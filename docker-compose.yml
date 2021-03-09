@@ -1,0 +1,122 @@
+services:
+  carts.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://carts.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: carts
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  catalogue.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://catalogue.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: catalogue
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  front-end.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://front-end.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: front-end
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  orders.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://orders.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: orders
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  payment.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://payment.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: payment
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  queue-master.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://queue-master.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: queue-master
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  shipping.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://shipping.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: shipping
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+  user.sock-shop:
+    cap_add:
+    - NET_BIND_SERVICE
+    cap_drop:
+    - all
+    command: /config/mockintosh.yml 'http://user.sock-shop'
+    environment:
+    - MOCKINTOSH_FORCE_PORT=80
+    hostname: user
+    image: testrio/mockintosh:latest
+    ports:
+    - 80
+    read_only: true
+    volumes:
+    - .:/config
+version: '3.3'

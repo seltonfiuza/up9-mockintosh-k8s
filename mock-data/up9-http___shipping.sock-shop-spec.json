@@ -1,0 +1,141 @@
+{
+ "info": {
+  "title": "http://shipping.sock-shop",
+  "version": "0.0"
+ },
+ "openapi": "3.0.2",
+ "paths": {
+  "/health": {
+   "get": {
+    "operationId": "d20746dc-7f8c-4d79-a428-5c99fb27e25d",
+    "parameters": [],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "health": [
+          {
+           "date": "2021-03-03T19:48:05.723Z",
+           "service": "shipping-rabbitmq",
+           "status": "OK"
+          },
+          {
+           "date": "2021-03-03T19:48:05.723Z",
+           "service": "shipping",
+           "status": "OK"
+          }
+         ]
+        },
+        "schema": {
+         "properties": {
+          "health": {
+           "items": {
+            "properties": {
+             "date": {
+              "type": "string"
+             },
+             "service": {
+              "type": "string"
+             },
+             "status": {
+              "type": "string"
+             }
+            },
+            "required": [
+             "date",
+             "service",
+             "status"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          }
+         },
+         "required": [
+          "health"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "OK"
+     }
+    },
+    "summary": "Seen 218 requests"
+   },
+   "parameters": []
+  },
+  "/shipping": {
+   "parameters": [],
+   "post": {
+    "operationId": "ce56cc31-a30c-46a5-9b96-2aaac278b4fa",
+    "parameters": [
+     {
+      "in": "header",
+      "name": "accept",
+      "required": false,
+      "schema": {
+       "enum": [
+        "application/json"
+       ],
+       "type": "string"
+      }
+     }
+    ],
+    "requestBody": {
+     "content": {
+      "application/json": {
+       "schema": {
+        "properties": {
+         "id": {
+          "type": "string"
+         },
+         "name": {
+          "type": "string"
+         }
+        },
+        "required": [
+         "id",
+         "name"
+        ],
+        "type": "object"
+       }
+      }
+     },
+     "required": true
+    },
+    "responses": {
+     "201": {
+      "content": {
+       "application/json": {
+        "example": {
+         "id": "013e504b-15ef-4eb6-8803-defd345b99ea",
+         "name": "57a98d98e4b00679b4a830b2"
+        },
+        "schema": {
+         "properties": {
+          "id": {
+           "type": "string"
+          },
+          "name": {
+           "type": "string"
+          }
+         },
+         "required": [
+          "id",
+          "name"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "Created"
+     }
+    },
+    "summary": "Seen 2350 requests"
+   }
+  }
+ },
+ "tags": []
+}
