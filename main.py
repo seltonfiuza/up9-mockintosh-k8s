@@ -36,13 +36,18 @@ Creating configmap resources based on mockintosh.yml file and mock-data folder.
         while True:
             pod_status = core_instance.read_namespaced_pod_status(
                 'up9-mockintosh-test-0', NAMESPACE)
+            if pod_status.status.container_statuses is None:
+                continue
             if pod_status.status.container_statuses[0].state.waiting.reason != 'PodInitializing':
                 time.sleep(3.0)
                 continue
-            time.sleep(2.0)
-            copy_zip_file = subprocess.run(
-                ["kubectl", "cp", f"{CWD}/{sys.argv[1]}", "up9-mockintosh-test-0:/config/up9-contracts.zip", "-c", "up9-load-files"])
-            print(f"Copied {sys.argv[1]} to the StatefulSet")
-            break
-    except Exception:
-        pass
+            try:
+                time.sleep(2.0)
+                copy_zip_file = subprocess.run(
+                    ["kubectl", "cp", f"{CWD}/{sys.argv[1]}", "up9-mockintosh-test-0:/config/up9-contracts.zip", "-c", "up9-load-files"])
+                print(f"Copied {sys.argv[1]} to the StatefulSet")
+                break
+            except Exception as e:
+                print(e)
+    except Exception as e:
+        print(e)
