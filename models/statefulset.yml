@@ -1,28 +1,15 @@
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: up9-mockintosh
-spec:
-  storageClassName: standard
-  resources:
-    requests:
-      storage: 1Gi
-  accessModes:
-    - ReadWriteOnce
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: up9-mockintosh
-  namespace: up9
+  name: up9-mockintosh-test
 spec:
+  serviceName: "mockintosh"
   progressDeadlineSeconds: 600
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      name: up9-mockintosh
+      name: up9-mockintosh-test
   strategy:
     rollingUpdate:
       maxSurge: 25%
@@ -31,16 +18,23 @@ spec:
   template:
     metadata:
       labels:
-        name: up9-mockintosh
+        name: up9-mockintosh-test
     spec:
       initContainers:
         - name: up9-load-files
-          image: busybox
+          image: kubeless/unzip:latest
           args:
-            - if [ ! -f "/config/mockintosh.yml" ] || [ ! "$(ls -A '/config/mock-data')" ]; then  
-                mkdir -p /config/mock-data;
-                cp /up9-mockintosh-config/mockintosh.yml /config/mockintosh.yml;
-                cp /up9-mock-data/* /config/mock-data/; 
+            - |
+              echo 'Waiting up9 contracts zip file in /config...'
+              while [ ! -f /config/up9-contracts.zip ]; do
+                sleep 2
+              done
+              if [ ! -f "/config/mockintosh.yml" ] || [ ! "$(ls -A '/config/mock-data')" ]; then  
+                unzip -n /config/up9-contracts.zip -d /tmp
+                mv /tmp/mocks/mockintosh.yml \
+                /tmp/mocks/target_services_mocks.json \
+                tmp/mocks/mock-data \
+                /config
               fi
           command:
             - "/bin/sh"
@@ -48,10 +42,6 @@ spec:
           volumeMounts:
           - mountPath: /config
             name: up9-mockintosh
-          - mountPath: /up9-mockintosh-config
-            name: up9-mockintosh-config
-          - mountPath: /up9-mock-data
-            name: up9-mock-data
       containers:
       - args:
         - cd /config && mockintosh mockintosh.yml
@@ -78,12 +68,4 @@ spec:
       volumes:
         - name: up9-mockintosh
           persistentVolumeClaim:
-            claimName: up9-mockintosh
-        - configMap:
-            defaultMode: 420
-            name: up9-mockintosh
-          name: up9-mockintosh-config
-        - configMap:
-            defaultMode: 420
-            name: up9-mock-data
-          name: up9-mock-data
+            claimName: up9-mockintosh-test

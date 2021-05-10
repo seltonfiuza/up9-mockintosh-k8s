@@ -1,67 +1,48 @@
-from os import system, popen, path, strerror
-import errno
 from kubernetes import client, config
-import json
 import yaml
-import pprint
-from models import Deployment
-import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument("option", help="""
-[single] to install a single deploment mockintosh on cluster; or;
-[multiple] to install one mockintosh deployment per service in docker-compose.yml
-""")
-args = parser.parse_args()
+import time
+import subprocess
+import os
+import sys
 
 NAMESPACE = 'up9'
+CWD = os.getcwd()
+
 
 if __name__ == '__main__':
 
+    print("""
+Creating configmap resources based on mockintosh.yml file and mock-data folder.
+    """)
+
+    config.load_kube_config()
+    api_instance = client.AppsV1Api()
+    core_instance = client.CoreV1Api()
+
+    subprocess.run(['kubectl', 'apply', '-f', './models/pvc.yml'])
     try:
-        print("""
-        Creating configmap resources based on mockintosh.yml file and mock-data folder.
-        """)
-        if not path.isfile('mockintosh.yml'):
-            raise FileNotFoundError(
-                errno.ENOENT, strerror(errno.ENOENT), 'mockintosh.yml')
-        if not path.isdir('mock-data'):
-            raise FileNotFoundError(
-                errno.ENOENT, strerror(errno.ENOENT), 'mock-data')
-        system(f'kubectl delete configmap -n {NAMESPACE} up9-mockintosh --ignore-not-found')
+        with open('./models/statefulset.yml', 'r') as fp:
+            yaml_as_dict = yaml.load(fp, Loader=yaml.FullLoader)
+            result = api_instance.create_namespaced_stateful_set(
+                namespace=NAMESPACE,
+                body=yaml_as_dict,
+                pretty=True,
+            )
+            print("Created up9-mockintosh-test statefulset")
+    except Exception:
+        pass
 
-        system(f'kubectl delete configmap -n {NAMESPACE} up9-mock-data  --ignore-not-found')
-
-        system(f'kubectl create configmap -n {NAMESPACE} up9-mockintosh \
-            --from-file=mockintosh.yml')
-
-        system(f'kubectl create configmap -n {NAMESPACE} up9-mock-data \
-            --from-file=mock-data/')
-        
-        if args.option == 'single':
-        # Create a single POD mockintosh
-            system(f"kubectl apply -f models/mockintosh.yml")
-
-        elif args.option == 'multiples':
-        # Create one mockintosh POD per service in docker-compose file
-            with open('./docker-compose.yml', 'r') as f:
-                docker_compose_file = f.read()
-
-            config.load_kube_config()
-
-            api_instance = client.AppsV1Api()
-
-            yaml_as_dict = yaml.load(docker_compose_file, Loader=yaml.Loader)
-            for service in yaml_as_dict['services']:
-                deploy = Deployment(yaml_as_dict['services'][service], NAMESPACE)
-                result = api_instance.create_namespaced_deployment(
-                    namespace=NAMESPACE,
-                    body=deploy.body,
-                    pretty=True,
-                    )
-                print(f"Created {service} mockintosh deployment")
-
-    except Exception as e:
-        print(e)
-    finally:
-        print("done")
+    try:
+        while True:
+            pod_status = core_instance.read_namespaced_pod_status(
+                'up9-mockintosh-test-0', NAMESPACE)
+            if pod_status.status.container_statuses[0].state.waiting.reason != 'PodInitializing':
+                time.sleep(3.0)
+                continue
+            time.sleep(2.0)
+            copy_zip_file = subprocess.run(
+                ["kubectl", "cp", f"{CWD}/{sys.argv[1]}", "up9-mockintosh-test-0:/config/up9-contracts.zip", "-c", "up9-load-files"])
+            print(f"Copied {sys.argv[1]} to the StatefulSet")
+            break
+    except Exception:
+        pass

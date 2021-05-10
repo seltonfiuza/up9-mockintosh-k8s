@@ -1,0 +1,20 @@
+{
+ "_embedded": {
+  "card": [
+   {
+    "longNum": "5544154011345918",
+    "expires": "08/19",
+    "ccv": "958",
+    "id": "57a98d98e4b00679b4a830b1",
+    "_links": {
+     "card": {
+      "href": "http://user/cards/57a98d98e4b00679b4a830b1"
+     },
+     "self": {
+      "href": "http://user/cards/57a98d98e4b00679b4a830b1"
+     }
+    }
+   }
+  ]
+ }
+}
